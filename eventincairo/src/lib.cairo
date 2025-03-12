@@ -15,7 +15,7 @@ pub trait IEventCounter<TContractState> {
     fn increment(ref self: TContractState, amount: u128);
 }
 
-mod Event {
+mod Events {
     //  Events must derive fromt the starknet::Event trait
     #[derive(Copy, Drop, Debug, PartialEq, starknet::Event)]
     // define our counterincrease event which will emit amount of u128 type
@@ -37,11 +37,22 @@ mod Event {
 }
 
 #[starknet::contract]
-mod HelloStarknet {
+mod EventCounter {
+    //importing the event struct the two struct
+    use super::Events::{CounterIncreased, UserIncreaseCounter};
+    // the trait of Event interfacecontract
+    use super::IEventCounter;
+    //the caller of the function at the particular time
+    use starknet::get_caller_address;
+    //import the Storage pointer which allows to read and write to the storage struct
+    use starknet::storage::{StoragePointerReadAccess, StorageMapWriteAccess};
+
     #[storage]
     struct Storage {
-        balance: felt252, 
+        counter: u128, 
     }
+
+    
 
     
 }
