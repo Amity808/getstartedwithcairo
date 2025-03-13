@@ -47,12 +47,42 @@ mod EventCounter {
     //import the Storage pointer which allows to read and write to the storage struct
     use starknet::storage::{StoragePointerReadAccess, StorageMapWriteAccess};
 
+    // a struct storage to write to blockchain
+    // with u128 type
     #[storage]
     struct Storage {
         counter: u128, 
     }
 
-    
+    #[event]
+    #[derive(Debug, Drop, Copy, PartialEq, starknet::Event)]
+    //the event must be annoated with #[event] attribute
+    // It must also derive at least the `Drop` and `starknet::Event` traits.
+    pub enum Event {
+        CounterIncreased: CounterIncreased,
+        UserIncreaseCounter: UserIncreaseCounter,
+    }
+
+    #[abi(embed_v0)]
+    impl EventCounter of IEventCounter<ContractState> {
+        fn increment(ref self: ContractState, amount: u128) {
+            self.counter.write(self.counter.read() + amount);
+            // to emit event
+            self.emit(Event::CounterIncreased(CounterIncreased {amount}));
+            // this also emit the caller which serves as the msg.sender in solidity
+            // and new counter value we can use it to update the value
+            self.emit(Event::UserIncreaseCounter(
+                UserIncreaseCounter {
+                    user: get_caller_address(), 
+                    new_value: self.counter.read() 
+                }
+            ))
+
+        }
+    }
+
+
+
 
     
 }
