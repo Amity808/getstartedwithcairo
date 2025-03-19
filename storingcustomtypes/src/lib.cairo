@@ -2,11 +2,15 @@
 trait IStoringCustomType<TContractState> {
     fn set_person(ref self: TContractState, person: Person);
     fn set_name(ref self: TContractState, name: felt252);
+    fn person_output(self: @TContractState) -> Person;
 }
 
 //we need to implement starknet::Store trait to store struct in the storage 
 // Deriving the trait through starknet::Store
 // we need to implement copy trait, drop trait and serde as well
+// The Serde trait provides the necessary serialization and deserialization capabilities for your custom types.
+// Deriving the `Serde` trait allows us to use
+// the `Person` type as an entrypoint parameter and as a return value
 #[derive(Drop, Serde, Copy, starknet::Store)]
 struct Person {
     age: u8,
@@ -45,6 +49,13 @@ mod StoringCustomType {
         // set_person fn takes in the contract state and the name which we want to write to the person struct
         fn set_name(ref self: ContractState, name: felt252) {
             self.person.name.write(name);
+        }
+
+        // getting the person output
+        fn person_output(self: @ContractState) -> Person {
+            Person {
+                age: 10, name: 'Joe'
+            }
         }
     }
 
